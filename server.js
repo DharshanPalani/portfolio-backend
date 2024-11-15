@@ -1,33 +1,29 @@
-const express = require('express')
-const mysql = require('mysql')
-const cors = require('cors')
+const express = require('express');
+const { Pool } = require('pg');
+const cors = require('cors');
+const dotenv = require('dotenv');
 
-const dotenv = require('dotenv')
+dotenv.config();
 
-dotenv.config()
+const app = express();
 
-const app = express()
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL
+});
 
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-})
+const query = 'SELECT * FROM post';
 
-const query = "SELECT * FROM posts"
+app.use(cors());
 
-app.use(cors())
-
-app.get('/', (req, res) => {
-    connection.query(query, (err, data) => {
-        if (err) return res.json(err)
-        return res.json(data)
-    })
-})
-
+app.get('/', async (req, res) => {
+    try {
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
 
 app.listen(8081, () => {
-    console.log("Server is up and listening")
-})
+    console.log('Server is up and listening');
+});
