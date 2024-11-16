@@ -11,13 +11,23 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL
 });
 
-const query = 'SELECT * FROM post';
+const posts_query = 'SELECT * FROM post';
+const recentWorks_query = 'SELECT * FROM recent_work'
 
 app.use(cors());
 
-app.get('/', async (req, res) => {
+app.get('/post', async (req, res) => {
     try {
-        const result = await pool.query(query);
+        const result = await pool.query(posts_query);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+app.get('/recent_work', async (req, res) => {
+    try {
+        const result = await pool.query(recentWorks_query);
         res.json(result.rows);
     } catch (err) {
         res.status(500).json(err);
